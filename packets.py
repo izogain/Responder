@@ -19,6 +19,7 @@ import settings
 
 from base64 import b64decode, b64encode
 from odict import OrderedDict
+from utils import HTTPCurrentDate, RespondWithIPAton
 
 # Packet class handling all packet generation (see odict.py).
 class Packet():
@@ -56,7 +57,7 @@ class NBT_Ans(Packet):
 	def calculate(self,data):
 		self.fields["Tid"] = data[0:2]
 		self.fields["NbtName"] = data[12:46]
-		self.fields["IP"] = settings.Config.IP_aton
+                self.fields["IP"] = RespondWithIPAton()
 
 # DNS Answer Packet
 class DNS_Ans(Packet):
@@ -82,7 +83,7 @@ class DNS_Ans(Packet):
 	def calculate(self,data):
 		self.fields["Tid"] = data[0:2]
 		self.fields["QuestionName"] = ''.join(data[12:].split('\x00')[:1])
-		self.fields["IP"] = settings.Config.IP_aton
+                self.fields["IP"] = RespondWithIPAton()
 		self.fields["IPLen"] = struct.pack(">h",len(self.fields["IP"]))
 
 # LLMNR Answer Packet
@@ -110,7 +111,7 @@ class LLMNR_Ans(Packet):
 	])
 
 	def calculate(self):
-		self.fields["IP"] = settings.Config.IP_aton
+                self.fields["IP"] = RespondWithIPAton()
 		self.fields["IPLen"] = struct.pack(">h",len(self.fields["IP"]))
 		self.fields["AnswerNameLen"] = struct.pack(">h",len(self.fields["AnswerName"]))[1]
 		self.fields["QuestionNameLen"] = struct.pack(">h",len(self.fields["QuestionName"]))[1]
@@ -204,11 +205,10 @@ class NTLM_Challenge(Packet):
 class IIS_Auth_401_Ans(Packet):
 	fields = OrderedDict([
 		("Code",          "HTTP/1.1 401 Unauthorized\r\n"),
-		("ServerType",    "Server: Microsoft-IIS/6.0\r\n"),
-		("Date",          "Date: Wed, 12 Sep 2012 13:06:55 GMT\r\n"),
+		("ServerType",    "Server: Microsoft-IIS/7.5\r\n"),
+		("Date",          "Date: "+HTTPCurrentDate()+"\r\n"),
 		("Type",          "Content-Type: text/html\r\n"),
 		("WWW-Auth",      "WWW-Authenticate: NTLM\r\n"),
-		("PoweredBy",     "X-Powered-By: ASP.NET\r\n"),
 		("Len",           "Content-Length: 0\r\n"),
 		("CRLF",          "\r\n"),
 	])
@@ -216,11 +216,10 @@ class IIS_Auth_401_Ans(Packet):
 class IIS_Auth_Granted(Packet):
 	fields = OrderedDict([
 		("Code",          "HTTP/1.1 200 OK\r\n"),
-		("ServerType",    "Server: Microsoft-IIS/6.0\r\n"),
-		("Date",          "Date: Wed, 12 Sep 2012 13:06:55 GMT\r\n"),
+		("ServerType",    "Server: Microsoft-IIS/7.5\r\n"),
+		("Date",          "Date: "+HTTPCurrentDate()+"\r\n"),
 		("Type",          "Content-Type: text/html\r\n"),
 		("WWW-Auth",      "WWW-Authenticate: NTLM\r\n"),
-		("PoweredBy",     "X-Powered-By: ASP.NET\r\n"),
 		("ContentLen",    "Content-Length: "),
 		("ActualLen",     "76"),
 		("CRLF",          "\r\n\r\n"),
@@ -232,13 +231,12 @@ class IIS_Auth_Granted(Packet):
 class IIS_NTLM_Challenge_Ans(Packet):
 	fields = OrderedDict([
 		("Code",          "HTTP/1.1 401 Unauthorized\r\n"),
-		("ServerType",    "Server: Microsoft-IIS/6.0\r\n"),
-		("Date",          "Date: Wed, 12 Sep 2012 13:06:55 GMT\r\n"),
+		("ServerType",    "Server: Microsoft-IIS/7.5\r\n"),
+		("Date",          "Date: "+HTTPCurrentDate()+"\r\n"),
 		("Type",          "Content-Type: text/html\r\n"),
 		("WWWAuth",       "WWW-Authenticate: NTLM "),
 		("Payload",       ""),
 		("Payload-CRLF",  "\r\n"),
-		("PoweredBy",     "X-Powered-By: ASP.NC0CD7B7802C76736E9B26FB19BEB2D36290B9FF9A46EDDA5ET\r\n"),
 		("Len",           "Content-Length: 0\r\n"),
 		("CRLF",          "\r\n"),
 	])
@@ -249,11 +247,10 @@ class IIS_NTLM_Challenge_Ans(Packet):
 class IIS_Basic_401_Ans(Packet):
 	fields = OrderedDict([
 		("Code",          "HTTP/1.1 401 Unauthorized\r\n"),
-		("ServerType",    "Server: Microsoft-IIS/6.0\r\n"),
-		("Date",          "Date: Wed, 12 Sep 2012 13:06:55 GMT\r\n"),
+		("ServerType",    "Server: Microsoft-IIS/7.5\r\n"),
+		("Date",          "Date: "+HTTPCurrentDate()+"\r\n"),
 		("Type",          "Content-Type: text/html\r\n"),
 		("WWW-Auth",      "WWW-Authenticate: Basic realm=\"Authentication Required\"\r\n"),
-		("PoweredBy",     "X-Powered-By: ASP.NET\r\n"),
 		("AllowOrigin",   "Access-Control-Allow-Origin: *\r\n"),
 		("AllowCreds",    "Access-Control-Allow-Credentials: true\r\n"),
 		("Len",           "Content-Length: 0\r\n"),
@@ -264,10 +261,9 @@ class IIS_Basic_401_Ans(Packet):
 class WPADScript(Packet):
 	fields = OrderedDict([
 		("Code",          "HTTP/1.1 200 OK\r\n"),
-		("ServerTlype",    "Server: Microsoft-IIS/6.0\r\n"),
-		("Date",          "Date: Wed, 12 Sep 2012 13:06:55 GMT\r\n"),
+		("ServerTlype",    "Server: Microsoft-IIS/7.5\r\n"),
+		("Date",          "Date: "+HTTPCurrentDate()+"\r\n"),
 		("Type",          "Content-Type: application/x-ns-proxy-autoconfig\r\n"),
-		("PoweredBy",     "X-Powered-By: ASP.NET\r\n"),
 		("ContentLen",    "Content-Length: "),
 		("ActualLen",     "76"),
 		("CRLF",          "\r\n\r\n"),
@@ -280,16 +276,15 @@ class ServeExeFile(Packet):
 	fields = OrderedDict([
 		("Code",          "HTTP/1.1 200 OK\r\n"),
 		("ContentType",   "Content-Type: application/octet-stream\r\n"),
-		("LastModified",  "Last-Modified: Wed, 24 Nov 2010 00:39:06 GMT\r\n"),
+		("LastModified",  "Last-Modified: "+HTTPCurrentDate()+"\r\n"),
 		("AcceptRanges",  "Accept-Ranges: bytes\r\n"),
 		("Server",        "Server: Microsoft-IIS/7.5\r\n"),
-		("PoweredBy",     "X-Powered-By: ASP.NET\r\n"),
 		("ContentDisp",   "Content-Disposition: attachment; filename="),
 		("ContentDiFile", ""),
 		("FileCRLF",      ";\r\n"),
 		("ContentLen",    "Content-Length: "),
 		("ActualLen",     "76"),
-		("Date",          "\r\nDate: Thu, 24 Oct 2013 22:35:46 GMT\r\n"),
+		("Date",          "\r\nDate: "+HTTPCurrentDate()+"\r\n"),
 		("Connection",    "Connection: keep-alive\r\n"),
 		("X-CCC",         "US\r\n"),
 		("X-CID",         "2\r\n"),
@@ -303,19 +298,80 @@ class ServeHtmlFile(Packet):
 	fields = OrderedDict([
 		("Code",          "HTTP/1.1 200 OK\r\n"),
 		("ContentType",   "Content-Type: text/html\r\n"),
-		("LastModified",  "Last-Modified: Wed, 24 Nov 2010 00:39:06 GMT\r\n"),
+		("LastModified",  "Last-Modified: "+HTTPCurrentDate()+"\r\n"),
 		("AcceptRanges",  "Accept-Ranges: bytes\r\n"),
 		("Server",        "Server: Microsoft-IIS/7.5\r\n"),
-		("PoweredBy",     "X-Powered-By: ASP.NET\r\n"),
 		("ContentLen",    "Content-Length: "),
 		("ActualLen",     "76"),
-		("Date",          "\r\nDate: Thu, 24 Oct 2013 22:35:46 GMT\r\n"),
+		("Date",          "\r\nDate: "+HTTPCurrentDate()+"\r\n"),
 		("Connection",    "Connection: keep-alive\r\n"),
 		("CRLF",          "\r\n"),
 		("Payload",       "jj"),
 	])
 	def calculate(self):
 		self.fields["ActualLen"] = len(str(self.fields["Payload"]))
+
+##### WPAD Auth Packets #####
+class WPAD_Auth_407_Ans(Packet):
+	fields = OrderedDict([
+		("Code",          "HTTP/1.1 407 Unauthorized\r\n"),
+		("ServerType",    "Server: Microsoft-IIS/7.5\r\n"),
+		("Date",          "Date: "+HTTPCurrentDate()+"\r\n"),
+		("Type",          "Content-Type: text/html\r\n"),
+		("WWW-Auth",      "Proxy-Authenticate: NTLM\r\n"),
+		("Connection",    "Proxy-Connection: close\r\n"),
+		("Cache-Control",    "Cache-Control: no-cache\r\n"),
+		("Pragma",        "Pragma: no-cache\r\n"),
+		("Proxy-Support", "Proxy-Support: Session-Based-Authentication\r\n"),
+		("Len",           "Content-Length: 0\r\n"),
+		("CRLF",          "\r\n"),
+	])
+
+
+class WPAD_NTLM_Challenge_Ans(Packet):
+	fields = OrderedDict([
+		("Code",          "HTTP/1.1 407 Unauthorized\r\n"),
+		("ServerType",    "Server: Microsoft-IIS/7.5\r\n"),
+		("Date",          "Date: "+HTTPCurrentDate()+"\r\n"),
+		("Type",          "Content-Type: text/html\r\n"),
+		("WWWAuth",       "Proxy-Authenticate: NTLM "),
+		("Payload",       ""),
+		("Payload-CRLF",  "\r\n"),
+		("Len",           "Content-Length: 0\r\n"),
+		("CRLF",          "\r\n"),
+	])
+
+	def calculate(self,payload):
+		self.fields["Payload"] = b64encode(payload)
+
+class WPAD_Basic_407_Ans(Packet):
+	fields = OrderedDict([
+		("Code",          "HTTP/1.1 407 Unauthorized\r\n"),
+		("ServerType",    "Server: Microsoft-IIS/7.5\r\n"),
+		("Date",          "Date: "+HTTPCurrentDate()+"\r\n"),
+		("Type",          "Content-Type: text/html\r\n"),
+		("WWW-Auth",      "Proxy-Authenticate: Basic realm=\"Authentication Required\"\r\n"),
+		("Connection",    "Proxy-Connection: close\r\n"),
+		("Cache-Control",    "Cache-Control: no-cache\r\n"),
+		("Pragma",        "Pragma: no-cache\r\n"),
+		("Proxy-Support", "Proxy-Support: Session-Based-Authentication\r\n"),
+		("Len",           "Content-Length: 0\r\n"),
+		("CRLF",          "\r\n"),
+	])
+
+##### WEB Dav Stuff #####
+class WEBDAV_Options_Answer(Packet):
+	fields = OrderedDict([
+		("Code",          "HTTP/1.1 200 OK\r\n"),
+		("Date",          "Date: "+HTTPCurrentDate()+"\r\n"),
+		("ServerType",    "Server: Microsoft-IIS/7.5\r\n"),
+		("Allow",         "Allow: GET,HEAD,POST,OPTIONS,TRACE\r\n"),
+		("Len",           "Content-Length: 0\r\n"),
+		("Keep-Alive:", "Keep-Alive: timeout=5, max=100\r\n"),
+		("Connection",    "Connection: Keep-Alive\r\n"),
+		("Content-Type",  "Content-Type: text/html\r\n"),
+		("CRLF",          "\r\n"),
+	])
 
 ##### FTP Packets #####
 class FTPPacket(Packet):
@@ -1539,4 +1595,6 @@ class SMB2Session2Data(Packet):
 		("SessionFlag",     "\x00\x00"),
 		("SecBlobOffSet",   "\x00\x00\x00\x00"),
     ])
+
+
 

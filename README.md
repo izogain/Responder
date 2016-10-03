@@ -89,7 +89,7 @@ Additionally, all captured hashed are logged into an SQLite database which you c
 
 ## Considerations ##
 
-- This tool listens on several ports: UDP 137, UDP 138, UDP 53, UDP/TCP 389,TCP 1433, TCP 80, TCP 139, TCP 445, TCP 21, TCP 3141,TCP 25, TCP 110, TCP 587 and Multicast UDP 5553.
+- This tool listens on several ports: UDP 137, UDP 138, UDP 53, UDP/TCP 389,TCP 1433, TCP 80, TCP 139, TCP 445, TCP 21, TCP 3141,TCP 25, TCP 110, TCP 587, TCP 3128 and Multicast UDP 5553.
 
 - If you run Samba on your system, stop smbd and nmbd and all other services listening on these ports.
 
@@ -121,7 +121,7 @@ Running the tool:
 
 Typical Usage Example:
 
-    ./Responder.py -I eth0 -rFv
+    ./Responder.py -I eth0 -rPv
 
 Options:
 
@@ -131,6 +131,11 @@ Options:
 	                        BROWSER, LLMNR requests without responding.
 	  -I eth0, --interface=eth0
 	                        Network interface to use.
+          -i 10.0.0.21, --ip=10.0.0.21
+                                Local IP to use (only for OSX)
+          -e 10.0.0.22, --externalip=10.0.0.22
+                                Poison all requests with another IP address than
+                                Responder's one.
 	  -b, --basic           Return a Basic HTTP authentication. Default: NTLM
 	  -r, --wredir          Enable answers for netbios wredir suffix queries.
 	                        Answering to wredir will likely break stuff on the
@@ -148,8 +153,12 @@ Options:
 	  -F, --ForceWpadAuth   Force NTLM/Basic authentication on wpad.dat file
 	                        retrieval. This may cause a login prompt. Default:
 	                        Off
+	  -P, --ProxyAuth       Force NTLM (transparently)/Basic (prompt) 
+                                authentication for the proxy. WPAD doesn't need to
+                                be ON. This option is highly effective when combined
+                                with -r. Default: Off
 	  --lm                  Force LM hashing downgrade for Windows XP/2003 and
-	                        earlier. Default: False
+	                        earlier. Default: Off
 	  -v, --verbose         Increase verbosity.
 	
 

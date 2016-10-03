@@ -20,7 +20,7 @@ import subprocess
 
 from utils import *
 
-__version__ = 'Responder 2.3.1'
+__version__ = 'Responder 2.3.2.5'
 
 class Settings:
 	
@@ -147,30 +147,35 @@ class Settings:
 		self.DontRespondToName = filter(None, [x.upper().strip() for x in config.get('Responder Core', 'DontRespondToName').strip().split(',')])
 
 		# Auto Ignore List
-		self.AutoIgnore                 = self.toBool(config.get('Responder Core', 'AutoIgnoreAfterSuccess'))
-		self.CaptureMultipleCredentials = self.toBool(config.get('Responder Core', 'CaptureMultipleCredentials'))
-		self.AutoIgnoreList             = []
+		self.AutoIgnore                       = self.toBool(config.get('Responder Core', 'AutoIgnoreAfterSuccess'))
+		self.CaptureMultipleCredentials       = self.toBool(config.get('Responder Core', 'CaptureMultipleCredentials'))
+                self.CaptureMultipleHashFromSameHost  = self.toBool(config.get('Responder Core', 'CaptureMultipleHashFromSameHost'))
+		self.AutoIgnoreList                   = []
 
 		# CLI options
-		self.LM_On_Off       = options.LM_On_Off
-		self.WPAD_On_Off     = options.WPAD_On_Off
-		self.Wredirect       = options.Wredirect
-		self.NBTNSDomain     = options.NBTNSDomain
-		self.Basic           = options.Basic
-		self.Finger_On_Off   = options.Finger
-		self.Interface       = options.Interface
-		self.OURIP           = options.OURIP
-		self.Force_WPAD_Auth = options.Force_WPAD_Auth
-		self.Upstream_Proxy  = options.Upstream_Proxy
-		self.AnalyzeMode     = options.Analyze
-		self.Verbose         = options.Verbose
-		self.CommandLine     = str(sys.argv)
+                self.ExternalIP         = options.ExternalIP
+		self.LM_On_Off          = options.LM_On_Off
+		self.WPAD_On_Off        = options.WPAD_On_Off
+		self.Wredirect          = options.Wredirect
+		self.NBTNSDomain        = options.NBTNSDomain
+		self.Basic              = options.Basic
+		self.Finger_On_Off      = options.Finger
+		self.Interface          = options.Interface
+		self.OURIP              = options.OURIP
+		self.Force_WPAD_Auth    = options.Force_WPAD_Auth
+		self.Upstream_Proxy     = options.Upstream_Proxy
+		self.AnalyzeMode        = options.Analyze
+		self.Verbose            = options.Verbose
+		self.ProxyAuth_On_Off   = options.ProxyAuth_On_Off
+		self.CommandLine        = str(sys.argv)
+
+                if self.ExternalIP:
+                        self.ExternalIPAton = socket.inet_aton(self.ExternalIP)
 
 		if self.HtmlToInject is None:
 			self.HtmlToInject = ''
 
-		self.Bind_To = utils.FindLocalIP(self.Interface, self.OURIP)
-
+                self.Bind_To = utils.FindLocalIP(self.Interface, self.OURIP)
 		self.IP_aton         = socket.inet_aton(self.Bind_To)
 		self.Os_version      = sys.platform
 
@@ -190,17 +195,12 @@ class Settings:
 		logging.warning('Responder Started: %s' % self.CommandLine)
 
 		Formatter = logging.Formatter('%(asctime)s - %(message)s')
-                CLog_Handler = logging.FileHandler(self.ResponderConfigDump, 'a')
 		PLog_Handler = logging.FileHandler(self.PoisonersLogFile, 'w')
 		ALog_Handler = logging.FileHandler(self.AnalyzeLogFile, 'a')
-                CLog_Handler.setLevel(logging.INFO)
 		PLog_Handler.setLevel(logging.INFO)
 		ALog_Handler.setLevel(logging.INFO)
 		PLog_Handler.setFormatter(Formatter)
 		ALog_Handler.setFormatter(Formatter)
-
-		self.ResponderConfigLogger = logging.getLogger('Config Dump Log')
-		self.ResponderConfigLogger.addHandler(CLog_Handler)
 
 		self.PoisonersLogger = logging.getLogger('Poisoners Log')
 		self.PoisonersLogger.addHandler(PLog_Handler)
@@ -212,8 +212,8 @@ class Settings:
                 DNS = subprocess.check_output(["cat", "/etc/resolv.conf"])
                 RoutingInfo = subprocess.check_output(["netstat", "-rn"])
                 Message = "Current environment is:\nNetwork Config:\n%s\nDNS Settings:\n%s\nRouting info:\n%s\n\n"%(NetworkCard,DNS,RoutingInfo)
-                self.ResponderConfigLogger.warning(Message)
-                self.ResponderConfigLogger.warning(str(self))
+                utils.DumpConfig(self.ResponderConfigDump, Message)
+                utils.DumpConfig(self.ResponderConfigDump,str(self))
 
 def init():
 	global Config
